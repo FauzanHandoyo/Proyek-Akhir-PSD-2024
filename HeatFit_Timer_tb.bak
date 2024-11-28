@@ -1,0 +1,94 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_ARITH.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+
+entity HeatFit_Timer_TB is
+end HeatFit_Timer_TB;
+
+architecture Behavioral of HeatFit_Timer_TB is
+    component HeatFit_Timer
+        Port (
+            clk         : in  STD_LOGIC;
+            reset       : in  STD_LOGIC;
+            heart_rate  : in  STD_LOGIC;
+            duration    : out STD_LOGIC_VECTOR(15 downto 0);
+            memory      : out STD_LOGIC_VECTOR(15 downto 0);
+            highest_time: out STD_LOGIC_VECTOR(15 downto 0);
+            latest_time : out STD_LOGIC_VECTOR(15 downto 0)
+        );
+    end component;
+
+    signal clk         : STD_LOGIC := '0';
+    signal reset       : STD_LOGIC := '0';
+    signal heart_rate  : STD_LOGIC := '0';
+    signal duration    : STD_LOGIC_VECTOR(15 downto 0);
+    signal memory      : STD_LOGIC_VECTOR(15 downto 0);
+    signal highest_time: STD_LOGIC_VECTOR(15 downto 0);
+    signal latest_time : STD_LOGIC_VECTOR(15 downto 0);
+
+    constant CLK_PERIOD : time := 10 ns;
+
+begin
+
+    uut: HeatFit_Timer
+        Port map (
+            clk         => clk,
+            reset       => reset,
+            heart_rate  => heart_rate,
+            duration    => duration,
+            memory      => memory,
+            highest_time=> highest_time,
+            latest_time => latest_time
+        );
+
+    clk_process : process
+    begin
+        while True loop
+            clk <= '0';
+            wait for CLK_PERIOD / 2;
+            clk <= '1';
+            wait for CLK_PERIOD / 2;
+        end loop;
+    end process;
+
+    stimulus_process : process
+    begin
+        -- Initialize
+        reset <= '0';
+        heart_rate <= '0';
+        wait for 20 ns;
+
+        -- Simulate active state (100 ns duration)
+        heart_rate <= '1';
+        wait for 100 ns;
+
+        -- Trigger reset and save to memory; check highest_time and latest_time
+        reset <= '1';
+        wait for 20 ns;
+        reset <= '0';
+
+        -- Simulate active state again (50 ns duration)
+        heart_rate <= '1';
+        wait for 50 ns;
+
+        -- Trigger reset and save to memory; check highest_time and latest_time
+        reset <= '1';
+        wait for 20 ns;
+        reset <= '0';
+
+        -- Simulate active state again (200 ns duration)
+        heart_rate <= '1';
+        wait for 200 ns;
+
+        -- Trigger reset and save to memory; ensure highest_time is updated, latest_time is recent
+        reset <= '1';
+        wait for 20 ns;
+        reset <= '0';
+
+        -- End simulation
+        wait;
+    end process;
+
+end Behavioral;
+

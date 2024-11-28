@@ -1,0 +1,65 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_ARITH.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+
+entity HeatFit_Timer is
+    Port (
+        clk         : in  STD_LOGIC;
+        reset       : in  STD_LOGIC; -- Reset to save in memory
+        heart_rate  : in  STD_LOGIC; -- 1 for active, 0 for idle
+        duration    : out STD_LOGIC_VECTOR(15 downto 0); -- Current duration
+        memory      : out STD_LOGIC_VECTOR(15 downto 0); -- Saved duration
+        highest_time: out STD_LOGIC_VECTOR(15 downto 0); -- Highest time recorded
+        latest_time : out STD_LOGIC_VECTOR(15 downto 0)  -- Most recent time recorded
+    );
+end HeatFit_Timer;
+
+architecture Behavioral of HeatFit_Timer is
+    signal state         : STD_LOGIC := '0'; -- 0: Idle, 1: Counting
+    signal counter       : STD_LOGIC_VECTOR(15 downto 0) := (others => '0');
+    signal memory_reg    : STD_LOGIC_VECTOR(15 downto 0) := (others => '0');
+    signal highest_time_reg : STD_LOGIC_VECTOR(15 downto 0) := (others => '0');
+    signal latest_time_reg  : STD_LOGIC_VECTOR(15 downto 0) := (others => '0');
+begin
+
+    process(clk, reset)
+    begin
+        if reset = '1' then
+            memory_reg <= counter; -- Save current counter to memory
+            
+            -- Update highest_time if current counter is greater
+            if counter > highest_time_reg then
+                highest_time_reg <= counter;
+            end if;
+
+            -- Update latest_time with the current counter
+            latest_time_reg <= counter;
+
+            counter <= (others => '0'); -- Reset counter
+            state <= '0'; -- Return to idle state
+        elsif rising_edge(clk) then
+            case state is
+                when '0' => -- Idle state
+                    if heart_rate = '1' then
+                        state <= '1';
+                    end if;
+                when '1' => -- Counting state
+                    if heart_rate = '0' then
+                        state <= '0';
+                    else
+                        counter <= counter + 1;
+                    end if;
+                when others =>
+                    state <= '0';
+            end case;
+        end if;
+    end process;
+
+    duration <= counter;
+    memory <= memory_reg; -- Output memory content
+    highest_time <= highest_time_reg; -- Output highest time content
+    latest_time <= latest_time_reg; -- Output latest time content
+
+end Behavioral;
+
