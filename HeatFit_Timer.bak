@@ -13,7 +13,7 @@ entity HeatFit_Timer is
         highest_time: out STD_LOGIC_VECTOR(15 downto 0); -- Highest time recorded
         latest_time : out STD_LOGIC_VECTOR(15 downto 0)  -- Most recent time recorded
     );
-end HeatFit_Timer;
+end HeatFit_Timer;s
 
 architecture Behavioral of HeatFit_Timer is
     signal state         : STD_LOGIC := '0'; -- 0: Idle, 1: Counting
@@ -21,38 +21,53 @@ architecture Behavioral of HeatFit_Timer is
     signal memory_reg    : STD_LOGIC_VECTOR(15 downto 0) := (others => '0');
     signal highest_time_reg : STD_LOGIC_VECTOR(15 downto 0) := (others => '0');
     signal latest_time_reg  : STD_LOGIC_VECTOR(15 downto 0) := (others => '0');
+
+    signal reset_prev    : STD_LOGIC := '0'; -- Tracks previous state of reset
+    signal reset_edge    : STD_LOGIC := '0'; -- Detects rising edge of reset
 begin
 
-    process(clk, reset)
+    -- Detect the rising edge of the reset signal
+    process(clk)
     begin
-        if reset = '1' then
-            memory_reg <= counter; -- Save current counter to memory
-            
-            -- Update highest_time if current counter is greater
-            if counter > highest_time_reg then
-                highest_time_reg <= counter;
-            end if;
+        if rising_edge(clk) then
+            reset_edge <= reset and not reset_prev;
+            reset_prev <= reset;
+        end if;
+    end process;
 
-            -- Update latest_time with the current counter
-            latest_time_reg <= counter;
+    -- Main logic for HeatFit Timer
+    process(clk)
+    begin
+        if rising_edge(clk) then
+            if reset_edge = '1' then
+                memory_reg <= counter; -- Save current counter to memory
 
-            counter <= (others => '0'); -- Reset counter
-            state <= '0'; -- Return to idle state
-        elsif rising_edge(clk) then
-            case state is
-                when '0' => -- Idle state
-                    if heart_rate = '1' then
-                        state <= '1';
-                    end if;
-                when '1' => -- Counting state
-                    if heart_rate = '0' then
+                -- Update highest_time if current counter is greater
+                if counter > highest_time_reg then
+                    highest_time_reg <= counter;
+                end if;
+
+                -- Update latest_time with the current counter
+                latest_time_reg <= counter;
+
+                counter <= (others => '0'); -- Reset counter
+                state <= '0'; -- Return to idle state
+            else
+                case state is
+                    when '0' => -- Idle state
+                        if heart_rate = '1' then
+                            state <= '1';
+                        end if;
+                    when '1' => -- Counting state
+                        if heart_rate = '0' then
+                            state <= '0';
+                        else
+                            counter <= counter + 1;
+                        end if;
+                    when others =>
                         state <= '0';
-                    else
-                        counter <= counter + 1;
-                    end if;
-                when others =>
-                    state <= '0';
-            end case;
+                end case;
+            end if;
         end if;
     end process;
 
