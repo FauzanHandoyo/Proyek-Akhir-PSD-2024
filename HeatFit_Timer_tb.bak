@@ -3,22 +3,26 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.STD_LOGIC_ARITH.ALL;
 use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
-entity HeatFit_Timer_TB is
-end HeatFit_Timer_TB;
+entity HeatFit_Timer_tb is
+end HeatFit_Timer_tb;
 
-architecture Behavioral of HeatFit_Timer_TB is
+architecture behavior of HeatFit_Timer_tb is
+
+    -- Component declaration for the Unit Under Test (UUT)
     component HeatFit_Timer
         Port (
             clk         : in  STD_LOGIC;
-            reset       : in  STD_LOGIC;
-            heart_rate  : in  STD_LOGIC;
-            duration    : out STD_LOGIC_VECTOR(15 downto 0);
-            memory      : out STD_LOGIC_VECTOR(15 downto 0);
-            highest_time: out STD_LOGIC_VECTOR(15 downto 0);
-            latest_time : out STD_LOGIC_VECTOR(15 downto 0)
+            reset       : in  STD_LOGIC; -- Reset to save in memory
+            heart_rate  : in  STD_LOGIC; -- 1 for active, 0 for idle
+            duration    : out STD_LOGIC_VECTOR(15 downto 0); -- Current duration
+            memory      : out STD_LOGIC_VECTOR(15 downto 0); -- Saved duration
+            highest_time: out STD_LOGIC_VECTOR(15 downto 0); -- Highest time recorded
+            latest_time : out STD_LOGIC_VECTOR(15 downto 0); -- Most recent time recorded
+            avg_time    : out STD_LOGIC_VECTOR(15 downto 0)  -- Average time across all sessions
         );
     end component;
 
+    -- Signals for testbench
     signal clk         : STD_LOGIC := '0';
     signal reset       : STD_LOGIC := '0';
     signal heart_rate  : STD_LOGIC := '0';
@@ -26,69 +30,74 @@ architecture Behavioral of HeatFit_Timer_TB is
     signal memory      : STD_LOGIC_VECTOR(15 downto 0);
     signal highest_time: STD_LOGIC_VECTOR(15 downto 0);
     signal latest_time : STD_LOGIC_VECTOR(15 downto 0);
+    signal avg_time    : STD_LOGIC_VECTOR(15 downto 0);
 
-    constant CLK_PERIOD : time := 10 ns;
+    -- Clock period
+    constant clk_period : time := 20 ns;
 
 begin
-
+    -- Instantiate the Unit Under Test (UUT)
     uut: HeatFit_Timer
         Port map (
-            clk         => clk,
-            reset       => reset,
-            heart_rate  => heart_rate,
-            duration    => duration,
-            memory      => memory,
-            highest_time=> highest_time,
-            latest_time => latest_time
+            clk => clk,
+            reset => reset,
+            heart_rate => heart_rate,
+            duration => duration,
+            memory => memory,
+            highest_time => highest_time,
+            latest_time => latest_time,
+            avg_time => avg_time
         );
 
+    -- Clock generation process
     clk_process : process
     begin
-        while True loop
-            clk <= '0';
-            wait for CLK_PERIOD / 2;
-            clk <= '1';
-            wait for CLK_PERIOD / 2;
-        end loop;
+        clk <= '0';
+        wait for clk_period / 2;
+        clk <= '1';
+        wait for clk_period / 2;
     end process;
 
-    stimulus_process : process
+    -- Stimulus process
+    stim_proc: process
     begin
-        -- Initialize
+        -- Initialize signals
         reset <= '0';
         heart_rate <= '0';
-        wait for 20 ns;
 
-        -- Simulate active state (100 ns duration)
+        -- Wait for reset initialization
+        wait for 40 ns;
+
+        -- First Session: Simulate heart rate = 1 and reset is deasserted, timer should start counting
         heart_rate <= '1';
-        wait for 100 ns;
-
-        -- Trigger reset and save to memory; check highest_time and latest_time
-        reset <= '1';
+        wait for 4 ns;  -- First session duration
+        heart_rate <= '0';  -- Stop the timer (heart rate = 0)
+        reset <= '1';  -- Save the session
+        wait for 20 ns; -- Let the reset stay for 20ns
+        reset <= '0'; -- Deassert reset, end of first session
         wait for 20 ns;
-        reset <= '0';
 
-        -- Simulate active state again (50 ns duration)
+        -- Second Session: Simulate heart rate = 1 and continue counting
         heart_rate <= '1';
-        wait for 50 ns;
-
-        -- Trigger reset and save to memory; check highest_time and latest_time
-        reset <= '1';
+        wait for 10 ns;  -- Second session duration
+        heart_rate <= '0';  -- Stop the timer
+        reset <= '1';  -- Save the session
         wait for 20 ns;
-        reset <= '0';
+        reset <= '0'; -- Deassert reset, end of second session
+        wait for 20 ns;
 
-        -- Simulate active state again (200 ns duration)
+        -- Third Session: Simulate heart rate = 1 and continue counting
         heart_rate <= '1';
-        wait for 200 ns;
-
-        -- Trigger reset and save to memory; ensure highest_time is updated, latest_time is recent
-        reset <= '1';
+        wait for 6 ns;  -- Third session duration
+        heart_rate <= '0';  -- Stop the timer
+        reset <= '1';  -- Save the session
         wait for 20 ns;
-        reset <= '0';
+        reset <= '0'; -- Deassert reset, end of third session
+        wait for 20 ns;
 
         -- End simulation
         wait;
     end process;
-
-end Behavioral;
+    
+end behavior;
 

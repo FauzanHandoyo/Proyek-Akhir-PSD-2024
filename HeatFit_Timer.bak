@@ -1,7 +1,6 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.STD_LOGIC_ARITH.ALL;
-use IEEE.STD_LOGIC_UNSIGNED.ALL;
+use IEEE.NUMERIC_STD.ALL;  -- Use numeric_std for unsigned and signed arithmetic
 
 entity HeatFit_Timer is
     Port (
@@ -11,19 +10,27 @@ entity HeatFit_Timer is
         duration    : out STD_LOGIC_VECTOR(15 downto 0); -- Current duration
         memory      : out STD_LOGIC_VECTOR(15 downto 0); -- Saved duration
         highest_time: out STD_LOGIC_VECTOR(15 downto 0); -- Highest time recorded
-        latest_time : out STD_LOGIC_VECTOR(15 downto 0)  -- Most recent time recorded
+        latest_time : out STD_LOGIC_VECTOR(15 downto 0); -- Most recent time recorded
+        avg_time    : out STD_LOGIC_VECTOR(15 downto 0)  -- Average time across all sessions
     );
-end HeatFit_Timer;s
+end HeatFit_Timer;
 
 architecture Behavioral of HeatFit_Timer is
-    signal state         : STD_LOGIC := '0'; -- 0: Idle, 1: Counting
-    signal counter       : STD_LOGIC_VECTOR(15 downto 0) := (others => '0');
-    signal memory_reg    : STD_LOGIC_VECTOR(15 downto 0) := (others => '0');
-    signal highest_time_reg : STD_LOGIC_VECTOR(15 downto 0) := (others => '0');
-    signal latest_time_reg  : STD_LOGIC_VECTOR(15 downto 0) := (others => '0');
+    signal state             : STD_LOGIC := '0'; -- 0: Idle, 1: Counting
+    signal counter           : unsigned(15 downto 0) := (others => '0');
+    signal memory_reg        : unsigned(15 downto 0) := (others => '0');
+    signal highest_time_reg  : unsigned(15 downto 0) := (others => '0');
+    signal latest_time_reg   : unsigned(15 downto 0) := (others => '0');
+    
+    -- New signals for Average Activity Time
+    signal total_time_reg    : unsigned(31 downto 0) := (others => '0');  -- Total time of all sessions (32 bits for larger values)
+    signal session_count_reg : unsigned(15 downto 0) := (others => '0');  -- Count of sessions
+    signal avg_time_reg      : unsigned(15 downto 0) := (others => '0');  -- Average time
 
-    signal reset_prev    : STD_LOGIC := '0'; -- Tracks previous state of reset
-    signal reset_edge    : STD_LOGIC := '0'; -- Detects rising edge of reset
+    signal reset_prev        : STD_LOGIC := '0'; -- Tracks previous state of reset
+    signal reset_edge        : STD_LOGIC := '0'; -- Detects rising edge of reset
+    signal reset_processing  : STD_LOGIC := '0'; -- Signal to track if reset is being processed
+    signal first_session_done: STD_LOGIC := '0'; -- Flag to track if the first session is complete
 begin
 
     -- Detect the rising edge of the reset signal
@@ -39,42 +46,64 @@ begin
     process(clk)
     begin
         if rising_edge(clk) then
-            if reset_edge = '1' then
-                memory_reg <= counter; -- Save current counter to memory
+            -- When reset is asserted, perform actions to store data and reset the timer
+            if reset = '1' then
+                -- Save current session data only when reset is not processing
+                if reset_processing = '0' then
+                    memory_reg <= counter;
 
-                -- Update highest_time if current counter is greater
-                if counter > highest_time_reg then
-                    highest_time_reg <= counter;
+                    -- Update the highest time if necessary
+                    if counter > highest_time_reg then
+                        highest_time_reg <= counter;
+                    end if;
+
+                    -- Update the total time and session count for average calculation
+                    total_time_reg <= total_time_reg + to_unsigned(to_integer(counter), 32);
+                    session_count_reg <= session_count_reg + 1;
+
+                    -- Calculate the average time
+                    if session_count_reg > 0 then
+                        avg_time_reg <= to_unsigned(to_integer(total_time_reg) / to_integer(session_count_reg), 16);
+                    end if;
                 end if;
 
-                -- Update latest_time with the current counter
-                latest_time_reg <= counter;
+                -- Reset the counter immediately when reset is asserted
+                counter <= (others => '0');
 
-                counter <= (others => '0'); -- Reset counter
-                state <= '0'; -- Return to idle state
+                -- Mark that reset is being processed
+                reset_processing <= '1';
             else
-                case state is
-                    when '0' => -- Idle state
-                        if heart_rate = '1' then
-                            state <= '1';
-                        end if;
-                    when '1' => -- Counting state
-                        if heart_rate = '0' then
-                            state <= '0';
-                        else
-                            counter <= counter + 1;
-                        end if;
-                    when others =>
-                        state <= '0';
-                end case;
+                -- When reset is deasserted, allow the `latest_time` to update
+                if reset_processing = '1' then
+                    latest_time_reg <= counter;
+                    reset_processing <= '0'; -- Reset processing done
+                end if;
+            end if;
+
+            -- Counting logic (if heart rate is 1, start counting)
+            if heart_rate = '1' then
+                if state = '0' then
+                    state <= '1'; -- Start counting when heart rate is 1
+                end if;
+            else
+                if state = '1' then
+                    state <= '0'; -- Stop counting when heart rate is 0
+                end if;
+            end if;
+
+            -- Update counter while counting
+            if state = '1' then
+                counter <= counter + 1;
             end if;
         end if;
     end process;
 
-    duration <= counter;
-    memory <= memory_reg; -- Output memory content
-    highest_time <= highest_time_reg; -- Output highest time content
-    latest_time <= latest_time_reg; -- Output latest time content
+    -- Assign outputs
+    duration <= std_logic_vector(counter);
+    memory <= std_logic_vector(memory_reg);
+    highest_time <= std_logic_vector(highest_time_reg);
+    latest_time <= std_logic_vector(latest_time_reg);
+    avg_time <= std_logic_vector(avg_time_reg);
 
 end Behavioral;
 
