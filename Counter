@@ -1,0 +1,29 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+
+entity Counter is
+    Port (
+        clk     : in STD_LOGIC;
+        reset   : in STD_LOGIC;
+        start   : in STD_LOGIC;
+        count   : out STD_LOGIC_VECTOR(15 downto 0)
+    );
+end Counter;
+
+architecture Behavioral of Counter is
+    signal counter_reg : unsigned(15 downto 0) := (others => '0');
+begin
+    process(clk)
+    begin
+        if rising_edge(clk) then
+            if reset = '1' then
+                counter_reg <= (others => '0');  -- Reset counter
+            elsif start = '1' then
+                counter_reg <= counter_reg + 1;  -- Increment counter
+            end if;
+        end if;
+    end process;
+
+    count <= std_logic_vector(counter_reg); -- Output the current counter value
+end Behavioral;

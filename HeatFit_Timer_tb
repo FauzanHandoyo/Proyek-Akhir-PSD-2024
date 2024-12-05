@@ -2,10 +2,10 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;  -- Use numeric_std for unsigned and signed arithmetic
 
-entity HeatFit_Timer_TB is
-end HeatFit_Timer_TB;
+entity HeatFit_Timer_tb is
+end HeatFit_Timer_tb;
 
-architecture Behavioral of HeatFit_Timer_TB is
+architecture Behavioral of HeatFit_Timer_tb is
     -- Component declaration for the unit under test (UUT)
     component HeatFit_Timer
         Port (
@@ -69,7 +69,7 @@ begin
             seconds     => seconds
         );
 
-    -- Clock generation
+    -- Clock generation process
     clk_process : process
     begin
         while True loop
@@ -80,74 +80,60 @@ begin
         end loop;
     end process;
 
-    -- Test stimulus
+    -- Test stimulus process
     stimulus_process : process
     begin
-        -- Initialize
+        -- Initial state
         reset <= '0';
         heart_rate <= '0';
         wait for 20 ns;
 
-        -- First Session: Simulate heart_rate = '1' for 100 ns
-        heart_rate <= '1';
-        wait for 100 ns;
-
-        -- Assert reset to save session and reset timer
-        reset <= '1';
+        -- First session
+        heart_rate <= '1';  -- Start counting
+        wait for 100 ns;     -- Active for 100 ns
+        reset <= '1';        -- Save session
         wait for 20 ns;
-        reset <= '0';
-
-        -- Check average time after first session (should match first session's duration)
+        reset <= '0';        -- Reset done
         wait for 10 ns;
 
-        -- Second Session: Simulate heart_rate = '1' for 150 ns
-        heart_rate <= '1';
-        wait for 150 ns;
-
-        -- Assert reset to save session and reset timer
-        reset <= '1';
+        -- Second session
+        heart_rate <= '1';  -- Start counting
+        wait for 150 ns;     -- Active for 150 ns
+        reset <= '1';        -- Save session
         wait for 20 ns;
-        reset <= '0';
-
-        -- Check average time after second session
+        reset <= '0';        -- Reset done
         wait for 10 ns;
 
-        -- Third Session: Simulate heart_rate = '1' for 75 ns
-        heart_rate <= '1';
-        wait for 75 ns;
-
-        -- Assert reset to save session and reset timer
-        reset <= '1';
+        -- Third session
+        heart_rate <= '1';  -- Start counting
+        wait for 75 ns;      -- Active for 75 ns
+        reset <= '1';        -- Save session
         wait for 20 ns;
-        reset <= '0';
-
-        -- Check average time after third session
+        reset <= '0';        -- Reset done
         wait for 10 ns;
 
-        -- Fourth Session: Simulate heart_rate = '1' for 50 ns
-        heart_rate <= '1';
-        wait for 50 ns;
-
-        -- Assert reset to save session and reset timer
-        reset <= '1';
+        -- Fourth session
+        heart_rate <= '1';  -- Start counting
+        wait for 50 ns;      -- Active for 50 ns
+        reset <= '1';        -- Save session
         wait for 20 ns;
-        reset <= '0';
-
-        -- Check average time after fourth session
+        reset <= '0';        -- Reset done
         wait for 10 ns;
 
-        -- Simulate the scenario where the timer runs for a longer time, 
-        -- ensuring the hours, minutes, and seconds update correctly.
-        -- Fifth Session: Simulate heart_rate = '1' for 3600 ns (1 hour)
-        heart_rate <= '1';
-        wait for 3600 ns;  -- 1 hour of active time
-
-        -- Assert reset after 1 hour to stop the session
-        reset <= '1';
+        -- Fifth session (longer time to test hours/minutes/seconds)
+        heart_rate <= '1';  -- Start counting
+        wait for 3600 ns;    -- Active for 1 hour
+        reset <= '1';        -- Save session
         wait for 20 ns;
-        reset <= '0';
+        reset <= '0';        -- Reset done
+        wait for 10 ns;
+
+        -- Test idle state (heart_rate = '0')
+        heart_rate <= '0';  -- Stop counting
+        wait for 100 ns;     -- Idle for 100 ns
 
         -- End simulation
         wait;
     end process;
+
 end Behavioral;
