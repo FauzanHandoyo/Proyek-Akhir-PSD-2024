@@ -1,90 +1,108 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.NUMERIC_STD.ALL;
 
-entity TimerController is
+entity HeatFit_Timer is
     Port (
-        clk           : in STD_LOGIC;
-        reset         : in STD_LOGIC;
-        heart_rate    : in STD_LOGIC;
-        duration      : out STD_LOGIC_VECTOR(15 downto 0);
-        memory        : out STD_LOGIC_VECTOR(15 downto 0);
-        highest_time  : out STD_LOGIC_VECTOR(15 downto 0);
-        latest_time   : out STD_LOGIC_VECTOR(15 downto 0);
-        avg_time      : out STD_LOGIC_VECTOR(15 downto 0);
-        hours         : out STD_LOGIC_VECTOR(7 downto 0);
-        minutes       : out STD_LOGIC_VECTOR(7 downto 0);
-        seconds       : out STD_LOGIC_VECTOR(7 downto 0)
+        clk         : in  STD_LOGIC;
+        reset       : in  STD_LOGIC;
+        heart_rate  : in  STD_LOGIC;
+        duration    : out STD_LOGIC_VECTOR(15 downto 0);
+        memory      : out STD_LOGIC_VECTOR(15 downto 0);
+        highest_time: out STD_LOGIC_VECTOR(15 downto 0);
+        latest_time : out STD_LOGIC_VECTOR(15 downto 0);
+        avg_time    : out STD_LOGIC_VECTOR(15 downto 0);
+        active_state: out STD_LOGIC;
+        stop_state  : out STD_LOGIC;
+        reset_state : out STD_LOGIC;
+        hours       : out STD_LOGIC_VECTOR(7 downto 0);
+        minutes     : out STD_LOGIC_VECTOR(7 downto 0);
+        seconds     : out STD_LOGIC_VECTOR(7 downto 0)
     );
-end TimerController;
+end HeatFit_Timer;
 
-architecture Behavioral of TimerController is
+architecture Structural of HeatFit_Timer is
     -- Internal signals
-    signal counter_reg       : unsigned(15 downto 0) := (others => '0');
-    signal memory_reg        : unsigned(15 downto 0) := (others => '0');
-    signal highest_time_reg  : unsigned(15 downto 0) := (others => '0');
-    signal latest_time_reg   : unsigned(15 downto 0) := (others => '0');
-    signal total_time_reg    : unsigned(31 downto 0) := (others => '0');
-    signal session_count_reg : unsigned(15 downto 0) := (others => '0');
-    signal avg_time_reg      : unsigned(15 downto 0) := (others => '0');
-    signal hours_reg         : unsigned(7 downto 0) := (others => '0');
-    signal minutes_reg       : unsigned(7 downto 0) := (others => '0');
-    signal seconds_reg       : unsigned(7 downto 0) := (others => '0');
+    signal internal_duration    : STD_LOGIC_VECTOR(15 downto 0);
+    signal internal_save         : STD_LOGIC := '0';
+    signal internal_enable       : STD_LOGIC := '0';
+    signal internal_reset_state  : STD_LOGIC := '0';
+
+    -- Components declaration
+    component Timer_Logic is
+        Port (
+            clk     : in  STD_LOGIC;
+            reset   : in  STD_LOGIC;
+            enable  : in  STD_LOGIC;
+            duration: out STD_LOGIC_VECTOR(15 downto 0);
+            hours   : out STD_LOGIC_VECTOR(7 downto 0);
+            minutes : out STD_LOGIC_VECTOR(7 downto 0);
+            seconds : out STD_LOGIC_VECTOR(7 downto 0)
+        );
+    end component;
+
+    component Session_Manager is
+        Port (
+            clk          : in  STD_LOGIC;
+            reset        : in  STD_LOGIC;
+            save         : in  STD_LOGIC;
+            duration     : in  STD_LOGIC_VECTOR(15 downto 0);
+            memory       : out STD_LOGIC_VECTOR(15 downto 0);
+            highest_time : out STD_LOGIC_VECTOR(15 downto 0);
+            latest_time  : out STD_LOGIC_VECTOR(15 downto 0);
+            avg_time     : out STD_LOGIC_VECTOR(15 downto 0)
+        );
+    end component;
+
 begin
+    -- Timer Logic Instance
+    Timer_Instance: Timer_Logic
+        Port map (
+            clk      => clk,
+            reset    => reset,
+            enable   => internal_enable,
+            duration => internal_duration,
+            hours    => hours,
+            minutes  => minutes,
+            seconds  => seconds
+        );
+
+    -- Session Manager Instance
+    Session_Instance: Session_Manager
+        Port map (
+            clk          => clk,
+            reset        => reset,
+            save         => internal_save,
+            duration     => internal_duration,
+            memory       => memory,
+            highest_time => highest_time,
+            latest_time  => latest_time,
+            avg_time     => avg_time
+        );
+
+    -- Control logic for enable and save signals
     process(clk)
     begin
         if rising_edge(clk) then
             if reset = '1' then
-                -- Reset all counters and registers
-                counter_reg       <= (others => '0');
-                memory_reg        <= (others => '0');
-                highest_time_reg  <= (others => '0');
-                latest_time_reg   <= (others => '0');
-                total_time_reg    <= (others => '0');
-                session_count_reg <= (others => '0');
-                avg_time_reg      <= (others => '0');
-                hours_reg         <= (others => '0');
-                minutes_reg       <= (others => '0');
-                seconds_reg       <= (others => '0');
+                internal_enable <= '0';
+                internal_save <= '0';
             elsif heart_rate = '1' then
-                -- Increment the counter
-                counter_reg <= counter_reg + 1;
-
-                -- Update memory with the current counter value
-                memory_reg <= counter_reg;
-
-                -- Update highest_time only if current duration is greater
-                if counter_reg > highest_time_reg then
-                    highest_time_reg <= counter_reg;
-                end if;
-
-                -- Update latest_time with the current counter value
-                latest_time_reg <= counter_reg;
-
-                -- Update total time and session count for average calculation
-                total_time_reg <= total_time_reg + counter_reg;
-                session_count_reg <= session_count_reg + 1;
-
-                -- Calculate average time
-                if session_count_reg > 0 then
-                    avg_time_reg <= total_time_reg(15 downto 0) / session_count_reg;
-                end if;
-
-                -- Calculate hours, minutes, and seconds
-                seconds_reg <= resize(counter_reg mod 60, 8);
-                minutes_reg <= resize((counter_reg / 60) mod 60, 8);
-                hours_reg   <= resize(counter_reg / 3600, 8);
+                internal_enable <= '1';  -- Enable Timer Logic
+                internal_save <= '0';    -- Do not save yet
+            elsif heart_rate = '0' and internal_enable = '1' then
+                internal_enable <= '0';  -- Disable Timer Logic
+                internal_save <= '1';    -- Trigger save in Session Manager
+            else
+                internal_save <= '0';    -- De-assert save after 1 cycle
             end if;
         end if;
     end process;
 
-    -- Assign outputs
-    duration      <= std_logic_vector(counter_reg);
-    memory        <= std_logic_vector(memory_reg);
-    highest_time  <= std_logic_vector(highest_time_reg);
-    latest_time   <= std_logic_vector(latest_time_reg);
-    avg_time      <= std_logic_vector(avg_time_reg);
-    hours         <= std_logic_vector(hours_reg);
-    minutes       <= std_logic_vector(minutes_reg);
-    seconds       <= std_logic_vector(seconds_reg);
-end Behavioral;
+    -- State indicators
+    active_state <= internal_enable;
+    stop_state   <= not internal_enable and not reset;
+    reset_state  <= reset;
+
+    -- Output duration
+    duration <= internal_duration;
+end Structural;

@@ -6,6 +6,7 @@ entity HeatFit_Timer is
         clk         : in  STD_LOGIC;
         reset       : in  STD_LOGIC;
         heart_rate  : in  STD_LOGIC;
+        pause       : in  STD_LOGIC; -- Added pause signal
         duration    : out STD_LOGIC_VECTOR(15 downto 0);
         memory      : out STD_LOGIC_VECTOR(15 downto 0);
         highest_time: out STD_LOGIC_VECTOR(15 downto 0);
@@ -14,6 +15,7 @@ entity HeatFit_Timer is
         active_state: out STD_LOGIC;
         stop_state  : out STD_LOGIC;
         reset_state : out STD_LOGIC;
+        paused_state: out STD_LOGIC; -- Added paused state
         hours       : out STD_LOGIC_VECTOR(7 downto 0);
         minutes     : out STD_LOGIC_VECTOR(7 downto 0);
         seconds     : out STD_LOGIC_VECTOR(7 downto 0)
@@ -27,6 +29,7 @@ architecture Structural of HeatFit_Timer is
             clk         : in  STD_LOGIC;
             reset       : in  STD_LOGIC;
             heart_rate  : in  STD_LOGIC;
+            pause       : in  STD_LOGIC; -- Added pause signal
             duration    : out STD_LOGIC_VECTOR(15 downto 0);
             memory      : out STD_LOGIC_VECTOR(15 downto 0);
             highest_time: out STD_LOGIC_VECTOR(15 downto 0);
@@ -35,6 +38,7 @@ architecture Structural of HeatFit_Timer is
             active_state: out STD_LOGIC;
             stop_state  : out STD_LOGIC;
             reset_state : out STD_LOGIC;
+            paused_state: out STD_LOGIC; -- Added paused state
             hours       : out STD_LOGIC_VECTOR(7 downto 0);
             minutes     : out STD_LOGIC_VECTOR(7 downto 0);
             seconds     : out STD_LOGIC_VECTOR(7 downto 0)
@@ -49,6 +53,7 @@ begin
             clk         => clk,
             reset       => reset,
             heart_rate  => heart_rate,
+            pause       => pause, -- Map the pause signal
             duration    => duration,
             memory      => memory,
             highest_time=> highest_time,
@@ -57,6 +62,7 @@ begin
             active_state=> active_state,
             stop_state  => stop_state,
             reset_state => reset_state,
+            paused_state=> paused_state, -- Map paused state
             hours       => hours,
             minutes     => minutes,
             seconds     => seconds

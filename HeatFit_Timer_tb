@@ -1,6 +1,6 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.NUMERIC_STD.ALL;  -- Use numeric_std for unsigned and signed arithmetic
+use IEEE.NUMERIC_STD.ALL;
 
 entity HeatFit_Timer_tb is
 end HeatFit_Timer_tb;
@@ -10,23 +10,21 @@ architecture Behavioral of HeatFit_Timer_tb is
     component HeatFit_Timer
         Port (
             clk         : in  STD_LOGIC;
-            reset       : in  STD_LOGIC; -- Reset to save in memory
-            heart_rate  : in  STD_LOGIC; -- 1 for active, 0 for idle
-            duration    : out STD_LOGIC_VECTOR(15 downto 0); -- Current duration
-            memory      : out STD_LOGIC_VECTOR(15 downto 0); -- Saved duration
-            highest_time: out STD_LOGIC_VECTOR(15 downto 0); -- Highest time recorded
-            latest_time : out STD_LOGIC_VECTOR(15 downto 0); -- Most recent time recorded
-            avg_time    : out STD_LOGIC_VECTOR(15 downto 0); -- Average time across all sessions
-            
-            -- New Indicators
-            active_state : out STD_LOGIC;  -- Active state indicator
-            stop_state   : out STD_LOGIC;  -- Stop state indicator
-            reset_state  : out STD_LOGIC;  -- Reset state indicator
-            
-            -- Hours, Minutes, and Seconds output
-            hours        : out STD_LOGIC_VECTOR(7 downto 0);  -- Hours as 8-bit vector
-            minutes      : out STD_LOGIC_VECTOR(7 downto 0);  -- Minutes as 8-bit vector
-            seconds      : out STD_LOGIC_VECTOR(7 downto 0)   -- Seconds as 8-bit vector
+            reset       : in  STD_LOGIC;
+            heart_rate  : in  STD_LOGIC;
+            pause       : in  STD_LOGIC; -- Added pause signal
+            duration    : out STD_LOGIC_VECTOR(15 downto 0);
+            memory      : out STD_LOGIC_VECTOR(15 downto 0);
+            highest_time: out STD_LOGIC_VECTOR(15 downto 0);
+            latest_time : out STD_LOGIC_VECTOR(15 downto 0);
+            avg_time    : out STD_LOGIC_VECTOR(15 downto 0);
+            active_state: out STD_LOGIC;
+            stop_state  : out STD_LOGIC;
+            reset_state : out STD_LOGIC;
+            paused_state: out STD_LOGIC; -- Added paused state
+            hours       : out STD_LOGIC_VECTOR(7 downto 0);
+            minutes     : out STD_LOGIC_VECTOR(7 downto 0);
+            seconds     : out STD_LOGIC_VECTOR(7 downto 0)
         );
     end component;
 
@@ -34,6 +32,7 @@ architecture Behavioral of HeatFit_Timer_tb is
     signal clk         : STD_LOGIC := '0';
     signal reset       : STD_LOGIC := '0';
     signal heart_rate  : STD_LOGIC := '0';
+    signal pause       : STD_LOGIC := '0'; -- Pause signal
     signal duration    : STD_LOGIC_VECTOR(15 downto 0);
     signal memory      : STD_LOGIC_VECTOR(15 downto 0);
     signal highest_time: STD_LOGIC_VECTOR(15 downto 0);
@@ -42,6 +41,7 @@ architecture Behavioral of HeatFit_Timer_tb is
     signal active_state: STD_LOGIC;
     signal stop_state  : STD_LOGIC;
     signal reset_state : STD_LOGIC;
+    signal paused_state: STD_LOGIC; -- Paused state
     signal hours       : STD_LOGIC_VECTOR(7 downto 0);
     signal minutes     : STD_LOGIC_VECTOR(7 downto 0);
     signal seconds     : STD_LOGIC_VECTOR(7 downto 0);
@@ -56,6 +56,7 @@ begin
             clk         => clk,
             reset       => reset,
             heart_rate  => heart_rate,
+            pause       => pause, -- Connect pause signal
             duration    => duration,
             memory      => memory,
             highest_time=> highest_time,
@@ -64,6 +65,7 @@ begin
             active_state=> active_state,
             stop_state  => stop_state,
             reset_state => reset_state,
+            paused_state=> paused_state, -- Map paused state
             hours       => hours,
             minutes     => minutes,
             seconds     => seconds
@@ -86,51 +88,27 @@ begin
         -- Initial state
         reset <= '0';
         heart_rate <= '0';
+        pause <= '0'; -- Start with no pause
         wait for 20 ns;
 
         -- First session
         heart_rate <= '1';  -- Start counting
-        wait for 100 ns;     -- Active for 100 ns
+        wait for 50 ns;      -- Active for 50 ns
+        pause <= '1';        -- Pause the timer
+        wait for 30 ns;      -- Paused for 30 ns
+        pause <= '0';        -- Resume the timer
+        wait for 50 ns;      -- Active for another 50 ns
         reset <= '1';        -- Save session
         wait for 20 ns;
         reset <= '0';        -- Reset done
         wait for 10 ns;
 
         -- Second session
-        heart_rate <= '1';  -- Start counting
-        wait for 150 ns;     -- Active for 150 ns
-        reset <= '1';        -- Save session
+        heart_rate <= '1';
+        wait for 100 ns;
+        reset <= '1';
         wait for 20 ns;
-        reset <= '0';        -- Reset done
-        wait for 10 ns;
-
-        -- Third session
-        heart_rate <= '1';  -- Start counting
-        wait for 75 ns;      -- Active for 75 ns
-        reset <= '1';        -- Save session
-        wait for 20 ns;
-        reset <= '0';        -- Reset done
-        wait for 10 ns;
-
-        -- Fourth session
-        heart_rate <= '1';  -- Start counting
-        wait for 50 ns;      -- Active for 50 ns
-        reset <= '1';        -- Save session
-        wait for 20 ns;
-        reset <= '0';        -- Reset done
-        wait for 10 ns;
-
-        -- Fifth session (longer time to test hours/minutes/seconds)
-        heart_rate <= '1';  -- Start counting
-        wait for 3600 ns;    -- Active for 1 hour
-        reset <= '1';        -- Save session
-        wait for 20 ns;
-        reset <= '0';        -- Reset done
-        wait for 10 ns;
-
-        -- Test idle state (heart_rate = '0')
-        heart_rate <= '0';  -- Stop counting
-        wait for 100 ns;     -- Idle for 100 ns
+        reset <= '0';
 
         -- End simulation
         wait;

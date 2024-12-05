@@ -1,0 +1,42 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+
+entity Timer_Logic is
+    Port (
+        clk     : in  STD_LOGIC;
+        reset   : in  STD_LOGIC;
+        enable  : in  STD_LOGIC;
+        duration: out STD_LOGIC_VECTOR(15 downto 0);
+        hours   : out STD_LOGIC_VECTOR(7 downto 0);
+        minutes : out STD_LOGIC_VECTOR(7 downto 0);
+        seconds : out STD_LOGIC_VECTOR(7 downto 0)
+    );
+end Timer_Logic;
+
+architecture Behavioral of Timer_Logic is
+    signal counter: unsigned(15 downto 0) := (others => '0');
+begin
+    -- Main counting logic
+    process(clk)
+    begin
+        if rising_edge(clk) then
+            if reset = '1' then
+                counter <= (others => '0');
+            elsif enable = '1' then
+                counter <= counter + 1;
+            end if;
+        end if;
+    end process;
+
+    -- Convert counter to hours, minutes, and seconds
+    process(counter)
+    begin
+        seconds <= std_logic_vector(resize(counter mod 60, 8));
+        minutes <= std_logic_vector(resize((counter / 60) mod 60, 8));
+        hours   <= std_logic_vector(resize(counter / 3600, 8));
+    end process;
+
+    -- Assign duration
+    duration <= std_logic_vector(counter);
+end Behavioral;
