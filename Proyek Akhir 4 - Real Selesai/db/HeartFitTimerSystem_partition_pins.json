@@ -1,0 +1,345 @@
+{
+	"partitions" : [
+		{
+			"name" : "Top",
+			"pins" : [
+				{
+					"name" : "heart_pulse[1]",
+					"strict" : false
+				},
+				{
+					"name" : "heart_pulse[2]",
+					"strict" : false
+				},
+				{
+					"name" : "heart_pulse[3]",
+					"strict" : false
+				},
+				{
+					"name" : "heart_pulse[4]",
+					"strict" : false
+				},
+				{
+					"name" : "heart_pulse[5]",
+					"strict" : false
+				},
+				{
+					"name" : "heart_pulse[6]",
+					"strict" : false
+				},
+				{
+					"name" : "heart_pulse[7]",
+					"strict" : false
+				},
+				{
+					"name" : "stopwatch_time[0]",
+					"strict" : false
+				},
+				{
+					"name" : "stopwatch_time[1]",
+					"strict" : false
+				},
+				{
+					"name" : "stopwatch_time[2]",
+					"strict" : false
+				},
+				{
+					"name" : "stopwatch_time[3]",
+					"strict" : false
+				},
+				{
+					"name" : "stopwatch_time[4]",
+					"strict" : false
+				},
+				{
+					"name" : "stopwatch_time[5]",
+					"strict" : false
+				},
+				{
+					"name" : "stopwatch_time[6]",
+					"strict" : false
+				},
+				{
+					"name" : "stopwatch_time[7]",
+					"strict" : false
+				},
+				{
+					"name" : "stopwatch_time[8]",
+					"strict" : false
+				},
+				{
+					"name" : "stopwatch_time[9]",
+					"strict" : false
+				},
+				{
+					"name" : "stopwatch_time[10]",
+					"strict" : false
+				},
+				{
+					"name" : "stopwatch_time[11]",
+					"strict" : false
+				},
+				{
+					"name" : "stopwatch_time[12]",
+					"strict" : false
+				},
+				{
+					"name" : "stopwatch_time[13]",
+					"strict" : false
+				},
+				{
+					"name" : "calorie_burned[0]",
+					"strict" : false
+				},
+				{
+					"name" : "calorie_burned[1]",
+					"strict" : false
+				},
+				{
+					"name" : "calorie_burned[2]",
+					"strict" : false
+				},
+				{
+					"name" : "calorie_burned[3]",
+					"strict" : false
+				},
+				{
+					"name" : "calorie_burned[4]",
+					"strict" : false
+				},
+				{
+					"name" : "calorie_burned[5]",
+					"strict" : false
+				},
+				{
+					"name" : "calorie_burned[6]",
+					"strict" : false
+				},
+				{
+					"name" : "calorie_burned[7]",
+					"strict" : false
+				},
+				{
+					"name" : "calorie_burned[8]",
+					"strict" : false
+				},
+				{
+					"name" : "calorie_burned[9]",
+					"strict" : false
+				},
+				{
+					"name" : "calorie_burned[10]",
+					"strict" : false
+				},
+				{
+					"name" : "calorie_burned[11]",
+					"strict" : false
+				},
+				{
+					"name" : "calorie_burned[12]",
+					"strict" : false
+				},
+				{
+					"name" : "calorie_burned[13]",
+					"strict" : false
+				},
+				{
+					"name" : "level[0]",
+					"strict" : false
+				},
+				{
+					"name" : "level[1]",
+					"strict" : false
+				},
+				{
+					"name" : "level[2]",
+					"strict" : false
+				},
+				{
+					"name" : "mode[0]",
+					"strict" : false
+				},
+				{
+					"name" : "mode[1]",
+					"strict" : false
+				},
+				{
+					"name" : "lap_storage[0]",
+					"strict" : false
+				},
+				{
+					"name" : "lap_storage[1]",
+					"strict" : false
+				},
+				{
+					"name" : "lap_storage[2]",
+					"strict" : false
+				},
+				{
+					"name" : "lap_storage[3]",
+					"strict" : false
+				},
+				{
+					"name" : "lap_storage[4]",
+					"strict" : false
+				},
+				{
+					"name" : "lap_storage[5]",
+					"strict" : false
+				},
+				{
+					"name" : "lap_storage[6]",
+					"strict" : false
+				},
+				{
+					"name" : "lap_storage[7]",
+					"strict" : false
+				},
+				{
+					"name" : "lap_storage[8]",
+					"strict" : false
+				},
+				{
+					"name" : "lap_storage[9]",
+					"strict" : false
+				},
+				{
+					"name" : "lap_storage[10]",
+					"strict" : false
+				},
+				{
+					"name" : "lap_storage[11]",
+					"strict" : false
+				},
+				{
+					"name" : "lap_storage[12]",
+					"strict" : false
+				},
+				{
+					"name" : "lap_storage[13]",
+					"strict" : false
+				},
+				{
+					"name" : "lap_storage[14]",
+					"strict" : false
+				},
+				{
+					"name" : "lap_storage[15]",
+					"strict" : false
+				},
+				{
+					"name" : "lap_storage[16]",
+					"strict" : false
+				},
+				{
+					"name" : "lap_storage[17]",
+					"strict" : false
+				},
+				{
+					"name" : "lap_storage[18]",
+					"strict" : false
+				},
+				{
+					"name" : "lap_storage[19]",
+					"strict" : false
+				},
+				{
+					"name" : "lap_storage[20]",
+					"strict" : false
+				},
+				{
+					"name" : "lap_storage[21]",
+					"strict" : false
+				},
+				{
+					"name" : "lap_storage[22]",
+					"strict" : false
+				},
+				{
+					"name" : "lap_storage[23]",
+					"strict" : false
+				},
+				{
+					"name" : "lap_storage[24]",
+					"strict" : false
+				},
+				{
+					"name" : "lap_storage[25]",
+					"strict" : false
+				},
+				{
+					"name" : "lap_storage[26]",
+					"strict" : false
+				},
+				{
+					"name" : "lap_storage[27]",
+					"strict" : false
+				},
+				{
+					"name" : "lap_storage[28]",
+					"strict" : false
+				},
+				{
+					"name" : "lap_storage[29]",
+					"strict" : false
+				},
+				{
+					"name" : "lap_storage[30]",
+					"strict" : false
+				},
+				{
+					"name" : "lap_storage[31]",
+					"strict" : false
+				},
+				{
+					"name" : "lap_storage[32]",
+					"strict" : false
+				},
+				{
+					"name" : "lap_storage[33]",
+					"strict" : false
+				},
+				{
+					"name" : "lap_storage[34]",
+					"strict" : false
+				},
+				{
+					"name" : "lap_storage[35]",
+					"strict" : false
+				},
+				{
+					"name" : "lap_storage[36]",
+					"strict" : false
+				},
+				{
+					"name" : "lap_storage[37]",
+					"strict" : false
+				},
+				{
+					"name" : "lap_storage[38]",
+					"strict" : false
+				},
+				{
+					"name" : "lap_storage[39]",
+					"strict" : false
+				},
+				{
+					"name" : "running",
+					"strict" : false
+				},
+				{
+					"name" : "heart_sensor",
+					"strict" : false
+				},
+				{
+					"name" : "reset",
+					"strict" : false
+				},
+				{
+					"name" : "clk",
+					"strict" : false
+				}
+			]
+		}
+	]
+}

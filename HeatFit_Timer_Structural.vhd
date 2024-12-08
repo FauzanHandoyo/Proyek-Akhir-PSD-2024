@@ -1,4 +1,3 @@
--- HeatFit_Timer_Structural.vhd
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.STD_LOGIC_ARITH.ALL;
@@ -58,7 +57,6 @@ architecture Structural of HeatFit_Timer is
             highest_in   : in  STD_LOGIC_VECTOR(15 downto 0); -- Highest time to save
             write_enable : in  STD_LOGIC; -- Control writing to file
             read_enable  : in  STD_LOGIC; -- Control reading from file
-            file_name    : in  string; -- File name (could be fixed or dynamic)
             data_out     : out STD_LOGIC_VECTOR(15 downto 0)  -- Output data when reading
         );
     end component;
@@ -101,10 +99,14 @@ begin
             duration_in => duration_signal,  -- Duration value to be logged
             highest_in  => highest_time_signal, -- Highest time value to be logged
             write_enable => write_enable_signal, -- Enable writing when reset and stop are triggered
-            read_enable  => read_enable_signal
-            file_name    => "user_data.txt",     -- The file to save user data
+            read_enable  => read_enable_signal,
             data_out     => memory  -- Output data from the file (if needed for reading)
         );
+
+    -- Assign internal signals to the entity's output ports
+    duration     <= duration_signal;
+    highest_time <= highest_time_signal;
+    stop_state   <= stop_signal;
 
     -- Logic to control write_enable signal based on reset and stop signals
     process(clk)
